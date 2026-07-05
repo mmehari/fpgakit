@@ -12,7 +12,8 @@ let options = {
     fields: [],
     sampleRate: 100000000n,
     autoView: -1,
-    vcdfile: "logiccap.vcd"
+    vcdfile: "logiccap.vcd",
+    maxCaptures: -1
 }
 
 // Process command line args...
@@ -46,6 +47,10 @@ for (let i=2; i<process.argv.length; i++)
     
             case "autoview":
                 options.autoView = Number(parts[1]);
+                break;
+
+            case "maxcaptures":
+                options.maxCaptures = Number(parts[1]);
                 break;
         }
     }
@@ -130,6 +135,7 @@ serialPort.on('data', onReceive);
 let receiveBufferUsed = -1;
 let receiveBuffer = Buffer.alloc(BitPacket.byteCountForBitWidth(options.bitCount));
 let receivedBuffers = [];
+let captureCount = 0;
 
 let idleTimer;
 function startIdleTimer()
@@ -252,10 +258,18 @@ function writeVcdFile()
     w.setTime(buffers.length + 1);
     w.close();
 
+    captureCount++;
     console.log(`VCD file written. ${options.vcdfile} - ${buffers.length} samples.`);
     console.log();
 
     spawn('gtkwave', [`--save=${options.vcdfile}.gtkw`, options.vcdfile], {
         detached: true
     });
+
+    // Check if max captures limit reached
+    if (options.maxCaptures > 0 && captureCount >= options.maxCaptures)
+    {
+        console.log(`Reached max captures (${options.maxCaptures}). Exiting.`);
+        process.exit(0);
+    }
 }
