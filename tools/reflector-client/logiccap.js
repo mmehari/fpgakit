@@ -123,7 +123,7 @@ else if (options.bitCount != totalWidth)
 }
 
 // open serial port
-let serialPort = new SerialPort(options.port, { baudRate : options.baud});
+let serialPort = new SerialPort.SerialPort({ path: options.port, baudRate: options.baud });
 serialPort.on('data', onReceive);
 
 // allocate receive buffer
