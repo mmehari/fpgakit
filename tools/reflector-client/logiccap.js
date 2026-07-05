@@ -255,7 +255,7 @@ function writeVcdFile()
 
     //fs.closeSync(fdDump);
 
-    w.setTime(buffers.length + 1);
+    w.setTime(fsPerSample * BigInt(buffers.length + 1));
     w.close();
 
     captureCount++;
